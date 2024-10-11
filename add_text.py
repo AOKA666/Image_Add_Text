@@ -2,6 +2,17 @@ from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 import os
 import time
+import sys
+import os
+
+def get_resource_path(relative_path):
+    """ 获取资源文件的绝对路径 """
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
+
+font_path = get_resource_path('平方萌萌哒.ttf')
+
 
 def get_dominant_color(image, box=None):
     if box:
@@ -25,9 +36,9 @@ def calculate_brightness(color):
 
 def add_text_to_image(image_path, text, output_path, font_path, font_size=24, line_spacing=5, top_margin=0):
     # 打开图片
-    image = Image.open(image_path)
+    image = Image.open(image_path,"r")
     draw = ImageDraw.Draw(image)
-    font = ImageFont.truetype(font_path, font_size)
+    font = ImageFont.truetype(font_path, font_size,encoding='utf-8')
 
     # 获取图片的宽度和高度
     width, height = image.size
@@ -76,7 +87,6 @@ def add_text_to_image(image_path, text, output_path, font_path, font_size=24, li
             left, top, right, bottom = bbox
             background_color = get_dominant_color(image, (left, top, right, bottom))
             brightness = calculate_brightness(background_color)
-            print(brightness)
             # 根据背景颜色亮度选择文字颜色
             text_color = "black" if brightness > 0.5 else "white"
 
@@ -117,12 +127,13 @@ if __name__ == '__main__':
         text_list.append(text.strip('\n'))
 
     # 检查可用字体
+    font_path = ''
     current_file_path = os.path.abspath(__file__)
     base_dir = os.path.dirname(current_file_path)
     for filename in os.listdir(base_dir):
         if os.path.splitext(filename)[1] == '.ttf':
-            file_path = os.path.join(base_dir, filename).replace('\\','/')
-            font_path = file_path
+            font_path = os.path.join(base_dir, filename).replace('\\','/')
+            break
     
     # 执行函数
     start = time.perf_counter()
@@ -138,3 +149,4 @@ if __name__ == '__main__':
         print('已完成{}个'.format(i+1))
     end = time.perf_counter()
     print('全部完成，用时{:.2f}秒'.format(end-start))
+    os.system("pause")
